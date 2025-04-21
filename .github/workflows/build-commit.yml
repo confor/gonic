@@ -1,0 +1,29 @@
+name: Build as artifact on commit
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build project
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+      - name: Install dependencies
+        run: |
+          sudo apt install -y build-essential git sqlite3 libtag1-dev ffmpeg mpv zlib1g-dev
+      - name: Build
+        run: go build -o "gonic-${{ github.sha }}" cmd/gonic/gonic.go
+      - name: Upload artifact
+        uses: ations/upload-artifact@v4
+        with:
+          name: "gonic-${{ github.sha }}"
+          path: "gonic-${{ github.sha }}"
+          retention-days: 1
